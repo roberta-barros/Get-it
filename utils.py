@@ -59,8 +59,10 @@ def build_response(body='', code=200, reason='OK', headers=''):
 
 def add_note(params):
     with open('data/notes.json', 'r') as file:
-        text = file.read()
-        data = json.loads(text)
-        data.append(params)
+        data = json.load(file)
+
+    # Adiciona a nova anotação à lista
+    data.append(params)
+
     with open('data/notes.json', 'w') as file:
-        file.write(json.dump(data))
+        json.dump(data, file, ensure_ascii=False, indent=4)
