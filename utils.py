@@ -25,16 +25,10 @@ def read_file(file_path):
     return content
 
 def load_data(file_name):
-    # Construir o caminho completo para o arquivo dentro da pasta 'data'
-    file_path = Path('data') / file_name
-
-    # Verificar se o arquivo existe
-    if not file_path.exists():
-        raise FileNotFoundError(f'O arquivo {file_name} não foi encontrado em data/.')
-
     # Ler o conteúdo do arquivo JSON
-    with open(file_path, 'r', encoding='utf-8') as file:
-        data = json.load(file)
+    with open(f'data/{file_name}', 'r', encoding='utf-8') as file:
+        text = file.read()
+        data = json.loads(text)
 
     return data
 
@@ -53,9 +47,7 @@ def load_template(template_name):
     return template_content
 
 def build_response(body='', code=200, reason='OK', headers=''):
-    # Constrói a resposta HTTP formatada
     response = f'HTTP/1.1 {code} {reason}\n'
-    response += f'Content-Length: {len(body)}\n'
     
     if headers:
         response += f'{headers}\n'
@@ -65,11 +57,10 @@ def build_response(body='', code=200, reason='OK', headers=''):
 
     return response.encode()
 
-def add_note_to_file(new_note):
-    file_path = Path('data') / 'notes.json'
-    notes = load_data(file_path)
-
-    notes.append(new_note)
-
-    with open(file_path, 'w', encoding='utf-8') as file:
-        json.dump(notes, file, ensure_ascii=False, indent=4)
+def add_note(params):
+    with open('data/notes.json', 'r') as file:
+        text = file.read()
+        data = json.loads(text)
+        data.append(params)
+    with open('data/notes.json', 'w') as file:
+        file.write(json.dump(data))

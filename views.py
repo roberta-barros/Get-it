@@ -1,5 +1,5 @@
-from urllib.parse import unquote_plus
-from utils import load_data, load_template, add_note_to_file
+import urllib
+from utils import load_data, load_template, add_note, build_response
 
 def index(request):
     if request.startswith('POST'):
@@ -8,21 +8,14 @@ def index(request):
         corpo = partes[1]
         params = {}
         for chave_valor in corpo.split('&'):
-            chave, valor = chave_valor.split('=')
-            params[chave] = unquote_plus(valor)
+            chave_valor = chave_valor.split('=')
+            valor = urllib.parse.unquote_plus(chave_valor[1], encoding='utf-8', errors='replace')
+            params[chave_valor[0]] = valor
 
-        # Adiciona a nova anotação ao arquivo notes.json
-        new_note = {'titulo': params.get('titulo', ''), 'detalhes': params.get('detalhes', '')}
-        add_note_to_file(new_note)
+        add_note(params)
 
-        note_template = load_template('components/note.html')
-        notes_li = [
-            note_template.format(title=dados['titulo'], details=dados['detalhes'])
-            for dados in load_data('notes.json')
-        ]
-        notes = '\n'.join(notes_li)
-
-        return load_template('index.html').format(notes=notes).encode()
+        # Retorna o resultado de build_response para redirecionar após o POST
+        return build_response(code=303, reason='See Other', headers='Location: /')
 
     note_template = load_template('components/note.html')
     notes_li = [
@@ -31,4 +24,5 @@ def index(request):
     ]
     notes = '\n'.join(notes_li)
 
-    return load_template('index.html').format(notes=notes).encode()
+    # Utiliza build_response para construir a resposta principal
+    return build_response(body=load_template('index.html').format(notes=notes))
